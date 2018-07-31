@@ -3,6 +3,7 @@ import re
 import logging
 import copy
 from ncm2 import Ncm2Base, getLogger
+import vim
 
 logger = getLogger(__name__)
 
@@ -10,6 +11,18 @@ fenced_block_pat = re.compile(
     r'^ (`{3,}|~{3,}) \s* (\S+)?  \s*  \n'
     r'(.+?)'
     r'^ \1 \s* (?:\n+|$)', re.M | re.X | re.S)
+
+
+aliases = {}
+# markdown_fenced_languages for https://github.com/tpope/vim-markdown
+# vim_markdown_fenced_languages for https://github.com/plasticboy/vim-markdown
+for element in vim.eval('get(g:, "markdown_fenced_languages", []) \
+        + get(g:, "vim_markdown_fenced_languages", [])'):
+    l1l2 = element.split("=")
+    if len(l1l2) != 2:
+        continue
+    l1, l2 = l1l2
+    aliases[l1] = l2
 
 
 class SubscopeDetector(Ncm2Base):
@@ -40,7 +53,7 @@ class SubscopeDetector(Ncm2Base):
         for idx, line in enumerate(new_src.split("\n")):
             if (p <= new_pos) and (p+len(line)+1 > new_pos):
                 subctx = {}
-                subctx['scope'] = scope['scope']
+                subctx['scope'] = aliases.get(scope['scope'], scope['scope'])
                 subctx['lnum'] = idx+1
                 subctx['ccol'] = new_pos-p+1
                 subctx['scope_offset'] = scope['scope_offset']
