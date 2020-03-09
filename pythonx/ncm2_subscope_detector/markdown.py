@@ -27,7 +27,7 @@ for element in vim.eval('get(g:, "markdown_fenced_languages", []) \
 
 class SubscopeDetector(Ncm2Base):
 
-    scope = ['markdown']
+    scope = vim.vars.get("ncm2_markdown_subscope#filetypes", ["markdown"])
 
     def detect(self, lnum, ccol, src):
 
